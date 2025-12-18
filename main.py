@@ -44,40 +44,41 @@ def load_file():
                         text_widgets[flt["name"]].insert(tk.END, stripped + "\n")
 
 
-# --- GUI Setup ---
-root = tk.Tk()
-root.title("Large Text File Viewer with JSON Filters")
-root.geometry("800x600")
+if __name__ == "__main__":
+    # --- GUI Setup ---
+    root = tk.Tk()
+    root.title("Large Text File Viewer with JSON Filters")
+    root.geometry("800x600")
 
-notebook = ttk.Notebook(root)
-notebook.pack(fill="both", expand=True)
+    notebook = ttk.Notebook(root)
+    notebook.pack(fill="both", expand=True)
 
-# Load filters from JSON file
-filters = load_filters()
+    # Load filters from JSON file
+    filters = load_filters()
 
-# Predefined "Original" tab
-text_widgets = {}
-frame = ttk.Frame(notebook)
-notebook.add(frame, text="Original")
-text_area = scrolledtext.ScrolledText(frame, wrap=tk.WORD)
-text_area.pack(fill="both", expand=True)
-text_widgets["Original"] = text_area
-
-# Create tabs dynamically from filters
-for flt in filters:
+    # Predefined "Original" tab
+    text_widgets = {}
     frame = ttk.Frame(notebook)
-    notebook.add(frame, text=flt["name"])
+    notebook.add(frame, text="Original")
     text_area = scrolledtext.ScrolledText(frame, wrap=tk.WORD)
     text_area.pack(fill="both", expand=True)
-    text_widgets[flt["name"]] = text_area
+    text_widgets["Original"] = text_area
 
-# Menu for loading file
-menubar = tk.Menu(root)
-file_menu = tk.Menu(menubar, tearoff=0)
-file_menu.add_command(label="Open File", command=load_file)
-file_menu.add_separator()
-file_menu.add_command(label="Exit", command=root.quit)
-menubar.add_cascade(label="File", menu=file_menu)
-root.config(menu=menubar)
+    # Create tabs dynamically from filters
+    for flt in filters:
+        frame = ttk.Frame(notebook)
+        notebook.add(frame, text=flt["name"])
+        text_area = scrolledtext.ScrolledText(frame, wrap=tk.WORD)
+        text_area.pack(fill="both", expand=True)
+        text_widgets[flt["name"]] = text_area
 
-root.mainloop()
+    # Menu for loading file
+    menubar = tk.Menu(root)
+    file_menu = tk.Menu(menubar, tearoff=0)
+    file_menu.add_command(label="Open File", command=load_file)
+    file_menu.add_separator()
+    file_menu.add_command(label="Exit", command=root.quit)
+    menubar.add_cascade(label="File", menu=file_menu)
+    root.config(menu=menubar)
+
+    root.mainloop()
