@@ -93,7 +93,7 @@ def load_file():
 def main_gui() -> None:
     # --- GUI Setup ---
     root = tk.Tk()
-    root.title("Large Text File Viewer with JSON Filters")
+    root.title("LOG VIEWER")
     root.geometry("800x600")
 
     notebook = ttk.Notebook(root)
