@@ -4,6 +4,30 @@ import json
 from pathlib import Path
 import re
 import shutil
+import sys
+
+
+def is_headless() -> bool:
+    try:
+        import tkinter as tk
+    except ImportError:
+        print("Tkinter is not available in this Python installation.")
+        return True
+
+    try:
+        # Try to create and immediately destroy a root window
+        root = tk.Tk()
+        root.withdraw()  # Hide the window
+        root.update_idletasks()
+        root.destroy()
+        print("Tkinter can be imported and a window can be launched.")
+    except tk.TclError as e:
+        print(
+            "Tkinter is available but cannot open a window (likely headless environment)."
+        )
+        return True
+
+    return False
 
 
 # Load filters from JSON
