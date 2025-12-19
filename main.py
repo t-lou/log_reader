@@ -22,9 +22,14 @@ def load_filters():
 def load_file():
     filepath = filedialog.askopenfilename(
         title="Select a text file",
-        filetypes=[("Text files", "*.txt"), ("All files", "*.*")],
+        filetypes=[
+            ("Text files", "*.txt"),
+            ("Log files", "*.log"),
+            ("All files", "*.*"),
+        ],
     )
-    if not filepath:
+    path = Path(filepath)
+    if not filepath or not path.exists():
         return
 
     # Clear existing text boxes
@@ -32,7 +37,7 @@ def load_file():
         text_widget.delete("1.0", tk.END)
 
     # Stream through the file line by line
-    with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
+    with path.open("r", encoding="utf-8", errors="ignore") as f:
         for line in f:
             stripped = line.strip()
             if not stripped:
