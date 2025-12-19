@@ -1,8 +1,22 @@
 [
     {
-        "name": "with_a",
+        "name": "se",
         "filters":
         [
+            {
+                "reg": false,
+                "keyword": "se"
+            }
+        ]
+    },
+    {
+        "name": "se&a",
+        "filters":
+        [
+            {
+                "reg": false,
+                "keyword": "se"
+            },
             {
                 "reg": false,
                 "keyword": "a"
@@ -10,12 +24,16 @@
         ]
     },
     {
-        "name": "with_g",
+        "name": "et&a",
         "filters":
         [
             {
                 "reg": true,
-                "keyword": "g"
+                "keyword": "et"
+            },
+            {
+                "reg": true,
+                "keyword": "a"
             }
         ]
     }
