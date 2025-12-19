@@ -1,13 +1,22 @@
 import tkinter as tk
 from tkinter import ttk, filedialog, scrolledtext
 import json
+from pathlib import Path
 import re
+import shutil
 
 
 # Load filters from JSON
-def load_filters(json_path="example_filters.json"):
-    with open(json_path, "r", encoding="utf-8") as f:
-        return json.load(f)
+def load_filters():
+    json_path = Path("config.json")
+    if not json_path.exists():
+        shutil.copy(Path("example_config.json"), json_path)
+    with json_path.open("r", encoding="utf-8") as fc:
+        main_config = json.load(fc)
+
+        with Path(main_config["entry_config"]).open("r", encoding="utf-8") as ff:
+            filters = json.load(ff)
+    return filters
 
 
 def load_file():
@@ -45,6 +54,9 @@ def load_file():
 
 
 if __name__ == "__main__":
+    # Load filters from JSON file
+    filters = load_filters()
+
     # --- GUI Setup ---
     root = tk.Tk()
     root.title("Large Text File Viewer with JSON Filters")
@@ -52,9 +64,6 @@ if __name__ == "__main__":
 
     notebook = ttk.Notebook(root)
     notebook.pack(fill="both", expand=True)
-
-    # Load filters from JSON file
-    filters = load_filters()
 
     # Predefined "Original" tab
     text_widgets = {}
