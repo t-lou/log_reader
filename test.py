@@ -2,7 +2,7 @@
 
 """Simple tests without pytest."""
 
-from main import Filter
+from src.filter import Filter
 
 
 def _precheck_assert():
