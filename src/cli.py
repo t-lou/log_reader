@@ -3,6 +3,7 @@ import shutil
 from pathlib import Path
 
 from src.filter import Filter
+from src.utils import make_name_filename
 
 
 def parse_cli_args():
@@ -39,7 +40,7 @@ def filter_logs(filters: dict[str, Filter], input_file: Path, output_dir: Path) 
     outputs = []
     ordered_filters = []
     for name, filters in filters.items():
-        f = (output_dir / (name + ".txt")).open("w", encoding="utf-8")
+        f = (output_dir / (make_name_filename(name) + ".txt")).open("w", encoding="utf-8")
         outputs.append(f)
         ordered_filters.append(filters)
 

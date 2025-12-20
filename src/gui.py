@@ -4,6 +4,7 @@ from pathlib import Path
 from tkinter import filedialog, scrolledtext, ttk
 
 from src.filter import Filter
+from src.utils import make_name_filename
 
 
 def load_file(filters: dict[str, Filter], text_widgets: dict[str, scrolledtext.ScrolledText], root_gui: tk.Tk):
@@ -61,7 +62,7 @@ def save_to(text_widgets: dict[str, scrolledtext.ScrolledText]):
 
     for name, widget in text_widgets.items():
         content = widget.get("1.0", "end-1c")
-        with (path / (name + ".txt")).open("w", encoding="utf-8") as f:
+        with (path / (make_name_filename(name) + ".txt")).open("w", encoding="utf-8") as f:
             f.write(content)
 
 

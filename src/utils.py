@@ -41,4 +41,24 @@ def load_filters() -> dict:
 
     filters = {s["name"]: Filter(settings=s["filters"], all_match=s["all_match"]) for s in settings}
     assert len(filters) == len(settings), "Names must be unique."
+    assert len(filters) == len({make_name_filename(n) for n in filters.keys()}), (
+        "make_name_filename(name)s must be unique."
+    )
     return filters
+
+
+def make_name_filename(name: str) -> str:
+    rules = {
+        ord("&"): "_and_",
+        ord("|"): "_or_",
+        ord(":"): "",
+        ord("/"): "",
+        ord("\\"): "",
+        ord("?"): "",
+        ord("<"): "",
+        ord(">"): "",
+        ord("*"): "",
+        ord(" "): "_",
+    }
+
+    return name.translate(rules)

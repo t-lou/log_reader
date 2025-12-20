@@ -3,6 +3,7 @@
 """Simple tests without pytest."""
 
 from src.filter import Filter
+from src.utils import make_name_filename
 
 
 def _precheck_assert():
@@ -68,10 +69,31 @@ def test_filter_any():
     assert filter.match("swich")
 
 
+def test_name_conversion():
+    test_data = {
+        "ab": "ab",
+        "a b": "a_b",
+        "a&b": "a_and_b",
+        "a|b": "a_or_b",
+        "a:b": "ab",
+        "a/b": "ab",
+        "a\\b": "ab",
+        "a?b": "ab",
+        "a<b": "ab",
+        "a>b": "ab",
+        "a*b": "ab",
+    }
+
+    for name, filename in test_data.items():
+        result = make_name_filename(name)
+        assert result == filename, f"mismatch '{name}' -> '{result}' != '{filename}'"
+
+
 if __name__ == "__main__":
     _precheck_assert()
     test_filter_plain()
     test_filter_regex()
     test_filter_all()
     test_filter_any()
+    test_name_conversion()
     print("tests passed")

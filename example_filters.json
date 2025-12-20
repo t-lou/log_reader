@@ -10,7 +10,7 @@
         "all_match": true
     },
     {
-        "name": "se_and_amet",
+        "name": "se&amet",
         "filters": [
             {
                 "reg": false,
@@ -24,7 +24,7 @@
         "all_match": true
     },
     {
-        "name": "est_and_amet",
+        "name": "est&amet",
         "filters": [
             {
                 "reg": true,
@@ -48,7 +48,7 @@
         "all_match": true
     },
     {
-        "name": "elitr_or_amet",
+        "name": "elitr|amet",
         "filters": [
             {
                 "reg": true,
