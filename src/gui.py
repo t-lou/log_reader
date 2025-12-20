@@ -3,11 +3,7 @@ from pathlib import Path
 from src.filter import Filter
 
 
-# global variables, try to refactor
-GLOBALS = {}
-
-
-def load_file(filters: dict[str, Filter]):
+def load_file(filters: dict[str, Filter], text_widgets):
     import tkinter as tk
     from tkinter import filedialog
 
@@ -24,7 +20,7 @@ def load_file(filters: dict[str, Filter]):
         return
 
     # Clear existing text boxes
-    for text_widget in GLOBALS["text_widgets"].values():
+    for text_widget in text_widgets.values():
         text_widget.config(state="normal")
         text_widget.delete("1.0", tk.END)
 
@@ -36,15 +32,15 @@ def load_file(filters: dict[str, Filter]):
                 continue
 
             # Always show in "Original"
-            GLOBALS["text_widgets"]["Original"].insert(tk.END, stripped + "\n")
+            text_widgets["Original"].insert(tk.END, stripped + "\n")
 
             # Apply filters
             for tab_name, tab_filters in filters.items():
                 if tab_filters.match(stripped):
-                    GLOBALS["text_widgets"][tab_name].insert(tk.END, stripped + "\n")
+                    text_widgets[tab_name].insert(tk.END, stripped + "\n")
 
     # Lock the text boxes to forbid editing
-    for text_widget in GLOBALS["text_widgets"].values():
+    for text_widget in text_widgets.values():
         text_widget.config(state="disabled")
 
 
@@ -61,12 +57,12 @@ def main_gui(filters: dict[str, Filter]) -> None:
     notebook.pack(fill="both", expand=True)
 
     # Predefined "Original" tab
-    GLOBALS["text_widgets"] = {}
+    text_widgets = {}
     frame = ttk.Frame(notebook)
     notebook.add(frame, text="Original")
     text_area = scrolledtext.ScrolledText(frame, wrap=tk.WORD)
     text_area.pack(fill="both", expand=True)
-    GLOBALS["text_widgets"]["Original"] = text_area
+    text_widgets["Original"] = text_area
 
     # Create tabs dynamically from filters
     for flt in filters.keys():
@@ -74,12 +70,14 @@ def main_gui(filters: dict[str, Filter]) -> None:
         notebook.add(frame, text=flt)
         text_area = scrolledtext.ScrolledText(frame, wrap=tk.WORD)
         text_area.pack(fill="both", expand=True)
-        GLOBALS["text_widgets"][flt] = text_area
+        text_widgets[flt] = text_area
 
     # Menu for loading file
     menubar = tk.Menu(root)
     file_menu = tk.Menu(menubar, tearoff=0)
-    file_menu.add_command(label="Open File", command=lambda: load_file(filters))
+    file_menu.add_command(
+        label="Open File", command=lambda: load_file(filters, text_widgets)
+    )
     file_menu.add_separator()
     file_menu.add_command(label="Exit", command=root.quit)
     menubar.add_cascade(label="File", menu=file_menu)
