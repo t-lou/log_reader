@@ -3,7 +3,6 @@
 
 from src.utils import is_headless, load_filters
 
-
 if __name__ == "__main__":
     filters = load_filters()
 

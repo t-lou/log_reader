@@ -1,6 +1,7 @@
 import json
-from pathlib import Path
 import shutil
+from pathlib import Path
+
 from src.filter import Filter
 
 

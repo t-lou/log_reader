@@ -1,12 +1,11 @@
-from pathlib import Path
 import tkinter as tk
-from tkinter import filedialog, ttk, scrolledtext
-
+from pathlib import Path
+from tkinter import filedialog, scrolledtext, ttk
 
 from src.filter import Filter
 
 
-def load_file(filters: dict[str, Filter], text_widgets):
+def load_file(filters: dict[str, Filter], text_widgets: dict[str, scrolledtext.ScrolledText], root_gui: tk.Tk):
     filepath = filedialog.askopenfilename(
         title="Select a text file",
         filetypes=[
@@ -18,6 +17,8 @@ def load_file(filters: dict[str, Filter], text_widgets):
     path = Path(filepath)
     if not filepath or not path.exists():
         return
+
+    root_gui.title(f"log reader -- {path.stem}")
 
     # Clear existing text boxes
     for text_widget in text_widgets.values():
@@ -47,7 +48,7 @@ def load_file(filters: dict[str, Filter], text_widgets):
 def main_gui(filters: dict[str, Filter]) -> None:
     # --- GUI Setup ---
     root = tk.Tk()
-    root.title("LOG VIEWER")
+    root.title("log reader")
     root.geometry("800x600")
 
     # Apply "clam" as theme, as tabs are clearer
@@ -76,7 +77,7 @@ def main_gui(filters: dict[str, Filter]) -> None:
     # Menu for loading file
     menubar = tk.Menu(root)
     file_menu = tk.Menu(menubar, tearoff=0)
-    file_menu.add_command(label="Open File", command=lambda: load_file(filters, text_widgets))
+    file_menu.add_command(label="Open File", command=lambda: load_file(filters, text_widgets, root))
     file_menu.add_separator()
     file_menu.add_command(label="Exit", command=root.quit)
     menubar.add_cascade(label="File", menu=file_menu)
