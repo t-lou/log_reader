@@ -1,31 +1,67 @@
 # Log Filter
 
-Do you always need to search for the same keywords in huge log files?
+Tired of searching for the same keywords in massive log files?  
+Tired of juggling multiple editor tabs, each showing a slightly different filtered view?
 
-Do you have several editors opened, with similar tabs for filtered log lines with different contents?
+This tool automates all of that — split logs by filters, or browse them interactively in a GUI.
 
-I'm tired of this. So make it automatic.
+---
+
+## Features
+
+- ✅ Define filters once in a JSON config  
+- ✅ Split huge log files into multiple filtered outputs (CLI)  
+- ✅ Browse logs interactively with tabs (GUI)  
+- ✅ Zero memory blow‑ups — everything streams line‑by‑line  
+- ✅ Works in headless environments (CLI fallback)
+
+---
 
 ## Usage
 
-1. Create a config.json, if it is not created and the main*.py is executed directly, a the example_config.json will be copied as an examlpe.
+### 1. Configuration
 
-2. Run the main script
+When you run the program for the first time, if `config.json` does not exist,  
+`example_config.json` will be copied automatically as a starting point.
 
-   a. command line to split a log file into several files (be careful the folder will be cleared)
-   ```bash
-   python main_cli.py ./example.txt ../test_output
-   ```
+You can edit the config to define your own filters.
 
-   b. GUI to view directly without saving (if GUI is not possible, like terminal only or no Tk, main_cli will run but with default parameters)
-   ```bash
-   python main.py
-   ```
+---
 
-      - click File -> Open File to navigate and open one file
-      - click File -> Save to save the splitted files to a folder (also the folder will be cleared)
-      - with Ctrl+c the texts can be copied, but the texts cannot be edited
+### 2. Running the tool
 
-# Screenshots
+### a. Command‑line mode (split logs into files)  
+⚠️ The output directory will be **cleared** before writing.
 
-![First](./imgs/gui_start.png) ![Second](./imgs/gui_show_original.png) ![Second](./imgs/gui_show_filtered.png)
+```bash
+python main_cli.py ./example.txt ../test_output
+```
+
+This reads `example.txt` and writes one output file per filter.
+
+---
+
+### b. GUI mode (interactive viewing)
+
+If Tkinter is available, the GUI launches automatically:
+
+```bash
+python main.py
+```
+
+Inside the GUI:
+
+- **File → Open File** to load a log  
+- **File → Save** to export filtered logs (output folder will be cleared)  
+- **Ctrl+C** copies text  
+- Text areas are read‑only to prevent accidental edits
+
+If the environment is headless (e.g., SSH terminal), the CLI mode runs instead.
+
+---
+
+## Screenshots
+
+![Start](./imgs/gui_start.png)
+![Original](./imgs/gui_show_original.png)
+![Filtered](./imgs/gui_show_filtered.png)
