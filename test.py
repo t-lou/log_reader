@@ -1,72 +1,108 @@
 #!/usr/bin/env python3
-
-"""Simple tests without pytest."""
+"""
+Simple tests without pytest.
+Run with:  python test_all.py
+"""
 
 from src.filter import Filter
 from src.utils import make_name_filename
+
+# -------------------------
+# Utility
+# -------------------------
 
 
 def _precheck_assert():
     try:
         assert False
-        print("assert not working")
-    except:  # noqa: E722
+        print("assert NOT working (unexpected)")
+    except AssertionError:
         print("assert working")
 
 
-def test_filter_plain():
-    filter = Filter([{"reg": False, "keyword": "et"}], True)
+def _run(test_fn):
+    """Run a test function and print a friendly message."""
+    name = test_fn.__name__
+    try:
+        test_fn()
+        print(f"[  OK  ] {name}")
+    except AssertionError as e:
+        print(f"[FAILED] {name}: {e}")
+        raise
+    except Exception as e:
+        print(f"[ERROR ] {name}: unexpected exception {e}")
+        raise
 
-    assert filter.match("et")
-    assert filter.match("et1")
-    assert filter.match("1et")
-    assert not filter.match("te")
-    assert not filter.match("sd")
-    assert not filter.match("")
+
+# -------------------------
+# Tests
+# -------------------------
+
+
+def test_filter_plain():
+    f = Filter([{"reg": False, "keyword": "et"}], True)
+
+    assert f.match("et")
+    assert f.match("et1")
+    assert f.match("1et")
+    assert not f.match("te")
+    assert not f.match("sd")
+    assert not f.match("")
 
 
 def test_filter_regex():
-    filter = Filter([{"reg": True, "keyword": r"etc:\s*-?\d+(?:\.\d+)?(?!$)"}], True)
+    f = Filter([{"reg": True, "keyword": r"etc:\s*-?\d+(?:\.\d+)?(?!$)"}], True)
 
-    assert filter.match("etc: 3.14")
-    assert filter.match("prefix etc: 3.14")
-    assert filter.match("etc: 3.14 suffix")
-    assert filter.match("prefix etc: 3.14")
-    assert filter.match("etc: 3.14,")
-    assert filter.match("prefix etc: 42 end")
-    assert filter.match("prefix etc: -0.5 end")
-    assert not filter.match("prefix etc: end")
-    assert not filter.match("prefix etc: ,")
+    assert f.match("etc: 3.14")
+    assert f.match("prefix etc: 3.14")
+    assert f.match("etc: 3.14 suffix")
+    assert f.match("etc: 3.14,")
+    assert f.match("prefix etc: 42 end")
+    assert f.match("prefix etc: -0.5 end")
+    assert not f.match("prefix etc: end")
+    assert not f.match("prefix etc: ,")
 
 
 def test_filter_all():
-    filter = Filter([{"reg": False, "keyword": "sand"}, {"reg": False, "keyword": "wich"}], True)
+    f = Filter(
+        [
+            {"reg": False, "keyword": "sand"},
+            {"reg": False, "keyword": "wich"},
+        ],
+        True,
+    )
 
-    assert filter.match("sandwich")
-    assert filter.match("wichsand")
-    assert filter.match("sand,wich")
-    assert filter.match("wich,sand")
-    assert filter.match("sandwichor")
-    assert filter.match("andwichsand")
-    assert not filter.match("sand*ich")
-    assert not filter.match("sand")
-    assert not filter.match("wich")
+    assert f.match("sandwich")
+    assert f.match("wichsand")
+    assert f.match("sand,wich")
+    assert f.match("wich,sand")
+    assert f.match("sandwichor")
+    assert f.match("andwichsand")
+    assert not f.match("sand*ich")
+    assert not f.match("sand")
+    assert not f.match("wich")
 
 
 def test_filter_any():
-    filter = Filter([{"reg": False, "keyword": "sand"}, {"reg": False, "keyword": "wich"}], False)
+    f = Filter(
+        [
+            {"reg": False, "keyword": "sand"},
+            {"reg": False, "keyword": "wich"},
+        ],
+        False,
+    )
 
-    assert filter.match("sandwich")
-    assert filter.match("wichsand")
-    assert filter.match("sand,wich")
-    assert filter.match("wich,sand")
-    assert filter.match("sandwichor")
-    assert filter.match("andwichsand")
-    assert not filter.match("san**ich")
-    assert filter.match("sand")
-    assert filter.match("wich")
-    assert filter.match("sandy")
-    assert filter.match("swich")
+    assert f.match("sandwich")
+    assert f.match("wichsand")
+    assert f.match("sand,wich")
+    assert f.match("wich,sand")
+    assert f.match("sandwichor")
+    assert f.match("andwichsand")
+    assert not f.match("san**ich")
+    assert f.match("sand")
+    assert f.match("wich")
+    assert f.match("sandy")
+    assert f.match("swich")
 
 
 def test_name_conversion():
@@ -84,16 +120,27 @@ def test_name_conversion():
         "a*b": "ab",
     }
 
-    for name, filename in test_data.items():
+    for name, expected in test_data.items():
         result = make_name_filename(name)
-        assert result == filename, f"mismatch '{name}' -> '{result}' != '{filename}'"
+        assert result == expected, f"'{name}' -> '{result}', expected '{expected}'"
 
+
+# -------------------------
+# Main
+# -------------------------
 
 if __name__ == "__main__":
     _precheck_assert()
-    test_filter_plain()
-    test_filter_regex()
-    test_filter_all()
-    test_filter_any()
-    test_name_conversion()
-    print("tests passed")
+
+    tests = [
+        test_filter_plain,
+        test_filter_regex,
+        test_filter_all,
+        test_filter_any,
+        test_name_conversion,
+    ]
+
+    for t in tests:
+        _run(t)
+
+    print("\nAll tests passed.")
