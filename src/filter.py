@@ -2,20 +2,33 @@ import re
 
 
 class Filter:
-    def __init__(self, settings: list[dict], all_match: bool) -> None:
+    def __init__(self, settings, all_match):
         self._all_match = all_match
-        self._compiled = []
+        self.substrings = []
+        self.regexes = []
 
         for s in settings:
-            keyword = s["keyword"]
             if s["reg"]:
-                # Precompile regex once
-                pattern = re.compile(keyword)
-                self._compiled.append(lambda line, p=pattern: bool(p.search(line)))
+                self.regexes.append(re.compile(s["keyword"]).search)
             else:
-                # Pre-store substring for fast lookup
-                self._compiled.append(lambda line, k=keyword: k in line)
+                self.substrings.append(s["keyword"])
 
-    def match(self, line: str) -> bool:
-        matcher = all if self._all_match else any
-        return matcher(fn(line) for fn in self._compiled)
+    def match(self, line):
+        if self._all_match:
+            # all must match
+            for sub in self.substrings:
+                if sub not in line:
+                    return False
+            for reg in self.regexes:
+                if not reg(line):
+                    return False
+            return True
+        else:
+            # any must match
+            for sub in self.substrings:
+                if sub in line:
+                    return True
+            for reg in self.regexes:
+                if reg(line):
+                    return True
+            return False
