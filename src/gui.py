@@ -16,90 +16,110 @@ def load_file(filters: dict[str, Filter], text_widgets: dict[str, scrolledtext.S
             ("All files", "*.*"),
         ],
     )
+
+    if not filepath:
+        return
+
     path = Path(filepath)
-    if not filepath or not path.exists():
+    if not path.exists():
         return
 
     root_gui.title(f"log filter -- {path.stem}")
 
-    # Clear existing text boxes
-    for text_widget in text_widgets.values():
-        text_widget.config(state="normal")
-        text_widget.delete("1.0", tk.END)
+    # Unlock widgets once
+    for widget in text_widgets.values():
+        widget.config(state="normal")
+        widget.delete("1.0", tk.END)
 
-    # Stream through the file line by line
+    # Prepare buffers for batch insertion
+    buffers = {name: [] for name in text_widgets.keys()}
+
+    # Stream file
     with path.open("r", encoding="utf-8", errors="ignore") as f:
         for line in f:
-            stripped = line.strip()
-            if not stripped:
+            if line.isspace():
                 continue
 
-            # Always show in "original"
-            text_widgets["original"].insert(tk.END, stripped + "\n")
+            stripped = line.rstrip("\n")
+
+            # Always add to original
+            buffers["original"].append(stripped)
 
             # Apply filters
-            for tab_name, tab_filters in filters.items():
-                if tab_filters.match(stripped):
-                    text_widgets[tab_name].insert(tk.END, stripped + "\n")
+            for tab_name, flt in filters.items():
+                if flt.match(stripped):
+                    buffers[tab_name].append(stripped)
 
-    # Lock the text boxes to forbid editing
-    for text_widget in text_widgets.values():
-        text_widget.config(state="disabled")
+    # Insert buffers in one go
+    for name, widget in text_widgets.items():
+        if buffers[name]:
+            widget.insert(tk.END, "\n".join(buffers[name]) + "\n")
+        widget.config(state="disabled")
 
 
 def save_to(text_widgets: dict[str, scrolledtext.ScrolledText]):
     folder = filedialog.askdirectory(title="Select or create directory to save the sub-logs")
 
-    path = Path(folder)
-    if not folder or not path.exists() or not path.is_dir():
+    if not folder:
         return
 
+    path = Path(folder)
+    if not path.exists() or not path.is_dir():
+        return
+
+    # Clean directory
     for item in path.iterdir():
         if item.is_file() or item.is_symlink():
             item.unlink()
         elif item.is_dir():
             shutil.rmtree(item)
 
+    # Save each widget
     for name, widget in text_widgets.items():
         content = widget.get("1.0", "end-1c")
-        with (path / (make_name_filename(name) + ".txt")).open("w", encoding="utf-8") as f:
-            f.write(content)
+        out_path = path / f"{make_name_filename(name)}.txt"
+        out_path.write_text(content, encoding="utf-8")
 
 
 def main_gui(filters: dict[str, Filter]) -> None:
-    # --- GUI Setup ---
     root = tk.Tk()
     root.title("log filter")
     root.geometry("800x600")
 
-    # Apply "clam" as theme, as tabs are clearer
     style = ttk.Style(root)
     style.theme_use("clam")
 
     notebook = ttk.Notebook(root)
     notebook.pack(fill="both", expand=True)
 
-    # Predefined "original" tab
     text_widgets = {}
+
+    # Original tab
     frame = ttk.Frame(notebook)
     notebook.add(frame, text="original")
     text_area = scrolledtext.ScrolledText(frame, wrap=tk.WORD)
     text_area.pack(fill="both", expand=True)
     text_widgets["original"] = text_area
 
-    # Create tabs dynamically from filters
-    for flt in filters.keys():
+    # Filter tabs
+    for flt_name in filters.keys():
         frame = ttk.Frame(notebook)
-        notebook.add(frame, text=flt)
+        notebook.add(frame, text=flt_name)
         text_area = scrolledtext.ScrolledText(frame, wrap=tk.WORD)
         text_area.pack(fill="both", expand=True)
-        text_widgets[flt] = text_area
+        text_widgets[flt_name] = text_area
 
-    # Menu for loading file
+    # Menu
     menubar = tk.Menu(root)
     file_menu = tk.Menu(menubar, tearoff=0)
-    file_menu.add_command(label="Open File", command=lambda: load_file(filters, text_widgets, root))
-    file_menu.add_command(label="Save", command=lambda: save_to(text_widgets))
+    file_menu.add_command(
+        label="Open File",
+        command=lambda: load_file(filters, text_widgets, root),
+    )
+    file_menu.add_command(
+        label="Save",
+        command=lambda: save_to(text_widgets),
+    )
     file_menu.add_separator()
     file_menu.add_command(label="Exit", command=root.quit)
     menubar.add_cascade(label="File", menu=file_menu)
