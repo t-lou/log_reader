@@ -87,6 +87,30 @@ def save_to(text_widgets: dict[str, scrolledtext.ScrolledText]):
         out_path.write_text(content, encoding="utf-8")
 
 
+def init_notebook(config: dict, text_widgets: dict[str, scrolledtext.ScrolledText], notebook: ttk.Notebook) -> None:
+    # Clear existing tabs
+    for tab_id in notebook.tabs():
+        notebook.forget(tab_id)
+    text_widgets.clear()
+
+    # Original tab
+    if config.get("show_original", True):
+        frame = ttk.Frame(notebook)
+        notebook.add(frame, text="original")
+        text_area = scrolledtext.ScrolledText(frame, wrap=tk.WORD)
+        text_area.pack(fill="both", expand=True)
+        text_widgets["original"] = text_area
+
+    # Filter tabs
+    filters = load_filters(config)
+    for flt_name in filters.keys():
+        frame = ttk.Frame(notebook)
+        notebook.add(frame, text=flt_name)
+        text_area = scrolledtext.ScrolledText(frame, wrap=tk.WORD)
+        text_area.pack(fill="both", expand=True)
+        text_widgets[flt_name] = text_area
+
+
 def main_gui() -> None:
     root = tk.Tk()
     root.title("log filter")
@@ -100,29 +124,19 @@ def main_gui() -> None:
 
     text_widgets = {}
     config = load_config()
-    filters = load_filters()
+    filters = load_filters(config)
 
-    # Original tab
-    if config.get("show_original", True):
-        frame = ttk.Frame(notebook)
-        notebook.add(frame, text="original")
-        text_area = scrolledtext.ScrolledText(frame, wrap=tk.WORD)
-        text_area.pack(fill="both", expand=True)
-        text_widgets["original"] = text_area
-
-    # Filter tabs
-    for flt_name in filters.keys():
-        frame = ttk.Frame(notebook)
-        notebook.add(frame, text=flt_name)
-        text_area = scrolledtext.ScrolledText(frame, wrap=tk.WORD)
-        text_area.pack(fill="both", expand=True)
-        text_widgets[flt_name] = text_area
+    init_notebook(config, text_widgets, notebook)
 
     # Menu
     menubar = tk.Menu(root)
     file_menu = tk.Menu(menubar, tearoff=0)
     file_menu.add_command(
         label="Open File",
+        command=lambda: load_file(filters, text_widgets, root),
+    )
+    file_menu.add_command(
+        label="Reload File",
         command=lambda: load_file(filters, text_widgets, root),
     )
     file_menu.add_command(

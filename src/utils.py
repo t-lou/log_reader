@@ -79,12 +79,13 @@ def load_config() -> dict:
     return main_config
 
 
-def load_filters() -> dict[str, Filter]:
+def load_filters(main_config: None | dict) -> dict[str, Filter]:
     """
     Load filter definitions from config.json and the referenced entry_config.
     Ensures config.json exists by copying example_config.json if needed.
     """
-    main_config = load_config()
+    if main_config is None:
+        main_config = load_config()
 
     entry_config_path = FOLDER_CODE / main_config["entry_config"]
     if not entry_config_path.exists():
