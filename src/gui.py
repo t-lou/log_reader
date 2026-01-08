@@ -3,8 +3,9 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, scrolledtext, ttk
 
+from src.buffer import Buffer
 from src.filter import Filter
-from src.utils import load_filters, load_config, make_name_filename
+from src.utils import load_config, load_filters, make_name_filename
 
 
 def load_file(filters: dict[str, Filter], text_widgets: dict[str, scrolledtext.ScrolledText], root_gui: tk.Tk):
@@ -32,7 +33,11 @@ def load_file(filters: dict[str, Filter], text_widgets: dict[str, scrolledtext.S
         widget.delete("1.0", tk.END)
 
     # Prepare buffers for batch insertion
-    buffers = {name: [] for name in text_widgets.keys()}
+    config = load_config()
+    buffers = {
+        name: Buffer(capacity=config["max_line"], save_first=config["show_first_max_line"])
+        for name in text_widgets.keys()
+    }
 
     # Stream file
     with path.open("r", encoding="utf-8", errors="ignore") as f:
@@ -44,17 +49,17 @@ def load_file(filters: dict[str, Filter], text_widgets: dict[str, scrolledtext.S
 
             if "original" in buffers:
                 # Always add to original
-                buffers["original"].append(stripped)
+                buffers["original"].add(stripped)
 
             # Apply filters
             for tab_name, flt in filters.items():
                 if flt.match(stripped):
-                    buffers[tab_name].append(stripped)
+                    buffers[tab_name].add(stripped)
 
     # Insert buffers in one go
     for name, widget in text_widgets.items():
         if buffers[name]:
-            widget.insert(tk.END, "\n".join(buffers[name]) + "\n")
+            widget.insert(tk.END, "\n".join(buffers[name].get()) + "\n")
         widget.config(state="disabled")
 
 
