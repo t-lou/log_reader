@@ -60,6 +60,14 @@ class Buffer:
         """
         return list(self._data)
 
+    def clear(self):
+        """Clear all stored items."""
+        if self.save_first:
+            self._data.clear()
+            self._full = False
+        else:
+            self._data.clear()
+
     def __len__(self):
         """Return the number of items currently stored."""
         return len(self._data)

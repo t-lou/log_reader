@@ -147,6 +147,7 @@ class MainGui:
         filters = load_filters(self._config)
 
         # Stream file line-by-line (efficient for large logs)
+        count_lines = 0
         with self._filename.open("r", encoding="utf-8", errors="ignore") as f:
             for line in f:
                 if line.isspace():
@@ -163,13 +164,28 @@ class MainGui:
                     if flt.match(stripped):
                         buffers[tab_name].add(stripped)
 
-        # Insert buffered content into each tab
+                # Keep GUI responsive
+                count_lines += 1
+                if count_lines % 500 == 0:
+                    self._root.update_idletasks()
+
+                    # Insert buffered content into each tab
+                    for name, widget in self._text_widgets.items():
+                        if buffers[name]:
+                            widget.insert(
+                                tk.END,
+                                "\n".join(buffers[name].get()) + "\n",
+                            )
+                            buffers[name].clear()
+
+        # Display the remaining buffered content and free the widgets
         for name, widget in self._text_widgets.items():
             if buffers[name]:
                 widget.insert(
                     tk.END,
                     "\n".join(buffers[name].get()) + "\n",
                 )
+                buffers[name].clear()
             widget.config(state="disabled")
 
     # ------------------------------------------------------------------
