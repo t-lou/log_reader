@@ -33,7 +33,7 @@ class MainGui:
         self._filename = None
 
         # Load config and create tabs accordingly
-        self._reload_with_config()
+        self._reinit()
 
         # ----- Menu bar -----
         menubar = tk.Menu(self._root)
@@ -62,7 +62,7 @@ class MainGui:
 
     # ------------------------------------------------------------------
 
-    def _reload_with_config(self) -> None:
+    def _reinit(self) -> None:
         """
         Reload configuration from disk and rebuild all tabs.
         This allows dynamic changes to filters/config without restarting.
@@ -147,6 +147,7 @@ class MainGui:
 
         with self._filename.open("r", encoding="utf-8", errors="ignore") as f:
             count_lines = 0
+            capacity = self._config["max_line"]
 
             for line in f:
                 if line.isspace():
@@ -166,7 +167,7 @@ class MainGui:
                 count_lines += 1
 
                 # Flush small chunks to GUI
-                if count_lines % 500 == 0:
+                if count_lines % capacity == 0:
                     for name, widget in self._text_widgets.items():
                         for buffered_line in buffers[name].get():
                             widget.insert(tk.END, buffered_line + "\n")
@@ -195,7 +196,7 @@ class MainGui:
         Reload configuration (which rebuilds tabs),
         then re-display the currently loaded file.
         """
-        self._reload_with_config()
+        self._reinit()
         self._display_file()
 
     # ------------------------------------------------------------------

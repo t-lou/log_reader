@@ -20,6 +20,7 @@ class Buffer:
             raise ValueError("capacity must be positive")
 
         self.capacity = capacity
+        # Still needed? Does original break with buffer?
         self.save_first = save_first
 
         if save_first:
